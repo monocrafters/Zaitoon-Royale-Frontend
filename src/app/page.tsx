@@ -1474,7 +1474,7 @@ export default function Home() {
                   ];
 
                   return (
-                    <div className="relative hidden min-h-[370px] overflow-visible py-3 lg:block">
+                    <div className="relative hidden min-h-[386px] overflow-visible py-3 lg:block">
                       {publicDeals.map((deal, index) => {
                           const raw = (index - idx + len) % len;
                           const signed = raw > len / 2 ? raw - len : raw; // circular shortest distance
@@ -1503,7 +1503,7 @@ export default function Home() {
                               }}
                               transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
                               className={[
-                                "absolute left-1/2 top-3 h-[332px] w-[32%] min-w-[320px] -translate-x-1/2 overflow-hidden rounded-3xl bg-gradient-to-br p-6 text-white shadow-[0_20px_55px_rgba(26,20,15,0.25)]",
+                                "absolute left-1/2 top-3 h-[348px] w-[32%] min-w-[320px] -translate-x-1/2 overflow-hidden rounded-3xl bg-gradient-to-br p-5 text-white shadow-[0_20px_55px_rgba(26,20,15,0.25)]",
                                 premiumPalettes[index % premiumPalettes.length],
                                 isCenter ? "ring-2 ring-white/25" : "ring-1 ring-white/10",
                               ].join(" ")}
@@ -1515,7 +1515,7 @@ export default function Home() {
                               ) : null}
                               <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/18 via-black/8 to-black/48" />
 
-                              <div className="relative flex h-full min-h-[240px] flex-col">
+                              <div className="relative flex h-full min-h-0 flex-col">
                                 <div className="flex flex-wrap items-center gap-2">
                                   {deal.badge ? (
                                     <span className="rounded-full bg-white/22 px-3 py-1 text-xs font-semibold backdrop-blur">
@@ -1529,19 +1529,19 @@ export default function Home() {
                                   ) : null}
                                 </div>
 
-                                <h3 className="mt-3 min-h-[3.35rem] pb-1 font-[family-name:var(--font-poppins)] text-[2.05rem] font-semibold leading-[1.08]">
+                                <h3 className="mt-2.5 min-h-[3rem] pb-0.5 font-[family-name:var(--font-poppins)] text-[1.9rem] font-semibold leading-[1.08]">
                                   {deal.title}
                                 </h3>
 
                                 {productsSummary ? (
-                                  <p className="mt-[20px] text-xs font-semibold leading-5 text-white/95">
+                                  <p className="mt-3 text-xs font-semibold leading-5 text-white/95">
                                     {productsSummary}
                                   </p>
                                 ) : (
-                                  <div className="mt-[20px]" />
+                                  <div className="mt-3" />
                                 )}
 
-                                <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm text-white/92">
+                                <p className="mt-1.5 line-clamp-2 min-h-[2.35rem] text-sm text-white/92">
                                   {deal.description || deal.subtitle || " "}
                                 </p>
                                 <p className="mt-1 text-xs text-white/92">
@@ -1571,17 +1571,17 @@ export default function Home() {
                                     ) : null}
                                   </div>
 
-                                  <div className="mt-[7px] flex items-center gap-3">
+                                  <div className="mt-2 grid grid-cols-2 gap-2">
                                     <Link
                                       href={deal.detailHref || `/deal/${deal._id}`}
-                                      className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold !text-[#111] transition hover:bg-[#f8efe6] hover:!text-[#111]"
+                                      className="inline-flex h-9 items-center justify-center rounded-xl bg-white px-3 text-sm font-semibold !text-[#111] transition hover:bg-[#f8efe6] hover:!text-[#111]"
                                     >
                                       See Offer
                                     </Link>
                                     <button
                                       type="button"
                                       onClick={(e) => e.stopPropagation()}
-                                      className="inline-flex items-center gap-2 rounded-xl bg-black/35 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-black/45 lg:px-5 lg:py-2.5"
+                                      className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-black/35 px-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-black/45"
                                     >
                                       <ShoppingCart className="h-4 w-4" />
                                       Add to Cart
