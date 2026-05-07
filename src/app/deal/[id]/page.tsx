@@ -172,7 +172,10 @@ export default function DealDetailPage() {
     0;
   const original = deal.pricing?.originalPrice ?? computedOriginal;
   const final = deal.pricing?.finalPrice ?? original;
-  const relatedDeals = allDeals.filter((d) => d._id !== deal._id).slice(0, 4);
+  const relatedDeals = useMemo(
+    () => allDeals.filter((d) => d._id !== deal._id).slice(0, 4),
+    [allDeals, deal._id]
+  );
   const getDealProductsLine = (d?: DealDetail | null) => {
     if (!d) return "";
     const items = Array.isArray(d.items) ? d.items : [];
