@@ -173,8 +173,8 @@ export default function DealDetailPage() {
   const original = deal.pricing?.originalPrice ?? computedOriginal;
   const final = deal.pricing?.finalPrice ?? original;
   const relatedDeals = useMemo(
-    () => allDeals.filter((d) => d._id !== deal._id).slice(0, 4),
-    [allDeals, deal._id]
+    () => allDeals.filter((d) => d._id !== (deal?._id || "")).slice(0, 4),
+    [allDeals, deal?._id]
   );
   const getDealProductsLine = (d?: DealDetail | null) => {
     if (!d) return "";
