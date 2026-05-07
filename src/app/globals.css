@@ -1,26 +1,171 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f2ea;
+  --foreground: #24180f;
+  --card: #ffffff;
+  --muted: #786a5d;
+  --primary: #5c2f18;
+  --primary-soft: #f3e2d2;
+  --border: #e7d8c8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
-  background: var(--background);
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at top, rgba(168, 93, 44, 0.08), transparent 28%),
+    linear-gradient(180deg, #fbf7f1 0%, var(--background) 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #111827;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+}
+
+/* Premium scrollbar (vertical + horizontal) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #5c2f18 #f3e2d2;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5c2f18 0%, #8b3f1c 100%);
+  border-radius: 999px;
+  border: 2px solid rgba(243, 226, 210, 0.95);
+}
+
+/* Force-hide hero card strip scrollbar */
+.hero-thumb-strip {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.hero-thumb-strip::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* Hide scrollbar for specific horizontal strips */
+.hide-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.cart-anim-host {
+  position: relative;
+  overflow: hidden;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.cart-anim-host:hover {
+  transform: scale(1.04);
+}
+
+.cart-anim-host > * {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.cart-anim-host.cart-add-success > * {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.cart-anim-host.cart-add-success::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  animation: cartAddTickIn 320ms ease;
+}
+
+.cart-anim-host.cart-add-success-label::after {
+  content: "✓ Add to Cart";
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  animation: cartAddTickIn 320ms ease;
+}
+
+.cart-anim-host.cart-add-success-label > * {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
+.cart-anim-host.cart-add-success-label {
+  color: transparent !important;
+}
+
+.cart-anim-host.cart-add-error::after {
+  content: "!";
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@keyframes cartAddTickIn {
+  0% { opacity: 0; transform: scale(0.7); }
+  100% { opacity: 1; transform: scale(1); }
 }
