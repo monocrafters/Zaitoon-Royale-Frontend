@@ -252,7 +252,7 @@ export default function CheckoutPage() {
 
         {(cart?.items?.length || 0) > 0 ? (
           <div className="mt-6 grid w-full max-w-none gap-3 sm:gap-5 lg:grid-cols-[1fr_360px]">
-            <div className="border-0 bg-transparent p-0 sm:rounded-3xl sm:border sm:border-[#eadccf] sm:bg-white sm:p-5 lg:rounded-3xl">
+            <div className="border-0 bg-[#f5efe8] p-0 sm:rounded-3xl sm:border sm:border-[#eadccf] sm:bg-white sm:p-5 lg:rounded-3xl">
               <h2 className="text-lg font-semibold text-[#1d140f]">Delivery Details</h2>
               <div className="mt-3 grid gap-3 bg-transparent sm:bg-transparent">
                 <input
@@ -313,35 +313,26 @@ export default function CheckoutPage() {
 
             <aside className="hidden border-y border-[#eadccf] bg-white p-4 sm:rounded-3xl sm:border sm:p-5 lg:block">
               <h3 className="text-base font-semibold text-[#1d140f]">Order Summary</h3>
-              <div className="mt-3 space-y-2 text-sm text-[#6f5647]">
-                <div className="flex items-center justify-between">
-                  <span>Items</span>
-                  <span className="text-right text-xs font-semibold text-[#2f1c12]">
-                    {cartItemNames.length ? cartItemNames.join(", ") : "—"}
-                    {(cart?.items?.length || 0) > 3 ? "..." : ""}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Delivery</span>
-                  <span className="font-semibold text-[#2f1c12]">Free</span>
-                </div>
-              </div>
-              <div className="mt-4 border-t border-[#efe2d5] pt-4">
+              <div className="mt-3 border-b border-[#efe2d5] pb-4">
                 <p className="text-base font-semibold text-[#2f1c12]">
                   Subtotal <span className="ml-1 text-[#b84a2b]">PKR {cart?.subtotal || 0}</span>
                 </p>
                 <p className="mt-1 text-[11px] text-[#7d6b5d]">Payment method and final confirmation on next step.</p>
-                {(cart?.items?.length || 0) > 0 ? (
-                  <div className="mt-3 rounded-xl border border-[#efe2d5] bg-[#fffaf4] p-2.5">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#7d6b5d]">All Items</p>
-                    <p className="mt-1 text-xs leading-5 text-[#5f544b]">
-                      {(cart?.items || [])
-                        .map((it) => String(it.deal?.title || it.product?.name || it.title || "").trim())
-                        .filter(Boolean)
-                        .join(", ")}
-                    </p>
-                  </div>
-                ) : null}
+              </div>
+              <div className="mt-4 space-y-2 text-sm text-[#6f5647]">
+                <div className="flex items-center justify-between">
+                  <span>Items</span>
+                  <span className="w-[78%] text-right text-xs font-semibold leading-5 text-[#2f1c12]">
+                    {(cart?.items || [])
+                      .map((it) => String(it.deal?.title || it.product?.name || it.title || "").trim())
+                      .filter(Boolean)
+                      .join(", ") || "—"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span>Delivery</span>
+                  <span className="font-semibold text-[#2f1c12]">Free</span>
+                </div>
               </div>
             </aside>
           </div>
@@ -386,7 +377,7 @@ export default function CheckoutPage() {
                   <article
                     key={item._id}
                     className={[
-                      "snap-start w-[62vw] min-w-[230px] max-w-[250px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]",
+                      "snap-start w-[55.5vw] min-w-[210px] max-w-[230px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 lg:w-[200px] lg:min-w-[200px] lg:max-w-[200px]",
                       idx === 0 ? "ml-2 sm:ml-0" : "",
                       idx === relatedProducts.length - 1 ? "mr-2 sm:mr-0" : "",
                     ].join(" ")}
@@ -426,6 +417,36 @@ export default function CheckoutPage() {
                         onClick={async () => {
                           if (addingProductId === item._id) return;
                           setAddingProductId(item._id);
+                          const unitPrice = getProductCardPrice(item);
+                          // Instant UI feedback in order summary before network roundtrip.
+                          setCart((prev) => {
+                            const base = prev || { cartId: "", items: [], subtotal: 0, totalItems: 0 };
+                            const nextItems = [...(base.items || [])];
+                            const idx = nextItems.findIndex(
+                              (it) => (it.kind || "product") === "product" && (it.product?._id || "") === item._id
+                            );
+                            if (idx >= 0) {
+                              const currentQty = Math.max(1, Number(nextItems[idx].qty) || 1);
+                              nextItems[idx] = {
+                                ...nextItems[idx],
+                                qty: currentQty + 1,
+                                unitPrice: Number(nextItems[idx].unitPrice) || unitPrice,
+                                lineTotal: (Number(nextItems[idx].unitPrice) || unitPrice) * (currentQty + 1),
+                              };
+                            } else {
+                              nextItems.unshift({
+                                kind: "product",
+                                product: { _id: item._id, name: item.name, imageUrl: item.imageUrl || "" },
+                                qty: 1,
+                                size: "",
+                                unitPrice,
+                                lineTotal: unitPrice,
+                              });
+                            }
+                            const totalItems = nextItems.reduce((s, it) => s + Math.max(1, Number(it.qty) || 1), 0);
+                            const subtotal = nextItems.reduce((s, it) => s + (Number(it.lineTotal) || 0), 0);
+                            return { ...base, items: nextItems, totalItems, subtotal };
+                          });
                           await addItemToCart(item._id, "", 1);
                           const snapshot = await fetchCartSnapshot();
                           setCart(snapshot);
