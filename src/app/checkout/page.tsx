@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, ShoppingCart } from "lucide-react";
 
 import SiteHeader from "@/components/public/site-header";
 import { API_BASE_URL } from "@/lib/admin-auth";
@@ -18,7 +18,28 @@ type RelatedProduct = {
   description?: string;
   imageUrl?: string;
   price?: number;
+  hasSizePricing?: boolean;
+  sizePrices?: { medium?: number };
+  badge?: "" | "Trending" | "Most Ordered" | "Best Seller" | "New Arrival" | "Chef's Special" | "Limited Deal";
   category?: { name?: string };
+};
+
+const getProductCardPrice = (product: RelatedProduct) => {
+  if (product.hasSizePricing) return Number(product.sizePrices?.medium) || Number(product.price) || 0;
+  return Number(product.price) || 0;
+};
+
+const getBadgePill = (badge?: RelatedProduct["badge"]) => {
+  const normalized = (badge || "").trim();
+  if (!normalized) return { label: "", className: "" };
+  const lower = normalized.toLowerCase();
+  if (lower.includes("best")) return { label: normalized, className: "bg-[#1f7a3a]" };
+  if (lower.includes("most")) return { label: normalized, className: "bg-[#b84a2b]" };
+  if (lower.includes("trend")) return { label: normalized, className: "bg-[#e07a2f]" };
+  if (lower.includes("new arrival")) return { label: normalized, className: "bg-[#5b2d17]" };
+  if (lower.includes("chef")) return { label: normalized, className: "bg-[#7a3f22]" };
+  if (lower.includes("limited")) return { label: normalized, className: "bg-[#ff4d4d]" };
+  return { label: normalized, className: "bg-[#5b2d17]" };
 };
 
 export default function CheckoutPage() {
@@ -34,6 +55,7 @@ export default function CheckoutPage() {
   const [directProductName, setDirectProductName] = useState("");
   const [directType, setDirectType] = useState("");
   const [directId, setDirectId] = useState("");
+  const [relatedStripEl, setRelatedStripEl] = useState<HTMLDivElement | null>(null);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -87,23 +109,14 @@ export default function CheckoutPage() {
     const loadRelated = async () => {
       setRelatedLoading(true);
       try {
-        const [detailRes, listRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/products/public/${directId}`, { cache: "no-store" }),
-          fetch(`${API_BASE_URL}/products/public`, { cache: "no-store" }),
-        ]);
-        const detailPayload = await detailRes.json();
+        const listRes = await fetch(`${API_BASE_URL}/products/public`, { cache: "no-store" });
         const listPayload = await listRes.json();
-        if (!detailRes.ok || !listRes.ok) throw new Error("Unable to load related items.");
-        const selected = (detailPayload?.product || null) as RelatedProduct | null;
+        if (!listRes.ok) throw new Error("Unable to load related items.");
         const allProducts = (Array.isArray(listPayload?.products) ? listPayload.products : []) as RelatedProduct[];
-        const related = selected
-          ? allProducts
-              .filter((p) => p._id !== selected._id && p.category?.name === selected.category?.name)
-              .slice(0, 6)
-          : [];
+        const selected = allProducts.find((p) => p._id === directId) || null;
         if (cancelled) return;
         setDirectProductName(selected?.name || "");
-        setRelatedProducts(related);
+        setRelatedProducts(allProducts.filter((p) => p._id !== directId));
       } catch {
         if (cancelled) return;
         setDirectProductName("");
@@ -164,6 +177,10 @@ export default function CheckoutPage() {
   const hasSavedAddress = Boolean(
     savedDelivery && (savedDelivery.defaultAddress?.trim() || savedDelivery.defaultCity?.trim())
   );
+  const cartItemNames = (cart?.items || [])
+    .map((it) => String(it.deal?.title || it.product?.name || it.title || "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
 
   return (
     <main className="min-h-screen bg-[#f5efe8] text-[#2f1c12] antialiased">
@@ -266,7 +283,10 @@ export default function CheckoutPage() {
               <div className="mt-3 space-y-2 text-sm text-[#6f5647]">
                 <div className="flex items-center justify-between">
                   <span>Items</span>
-                  <span className="font-semibold text-[#2f1c12]">{cart?.totalItems || 0}</span>
+                  <span className="text-right text-xs font-semibold text-[#2f1c12]">
+                    {cartItemNames.length ? cartItemNames.join(", ") : "—"}
+                    {(cart?.items?.length || 0) > 3 ? "..." : ""}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Delivery</span>
@@ -287,25 +307,64 @@ export default function CheckoutPage() {
           <section className="mt-6 w-full">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-lg font-semibold text-[#1d140f]">Related Items</h3>
-              {directProductName ? <p className="text-xs text-[#7d6b5d]">Based on {directProductName}</p> : null}
+              <div className="flex items-center gap-2">
+                {directProductName ? <p className="hidden text-xs text-[#7d6b5d] sm:block">Based on {directProductName}</p> : null}
+                <div className="hidden items-center gap-2 lg:flex">
+                  <button
+                    type="button"
+                    onClick={() => relatedStripEl?.scrollBy({ left: -340, behavior: "smooth" })}
+                    className="rounded-xl border border-[#eadccf] bg-white p-2 text-[#5b2d17] hover:bg-[#f4efe8]"
+                    aria-label="Scroll related products left"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => relatedStripEl?.scrollBy({ left: 340, behavior: "smooth" })}
+                    className="rounded-xl border border-[#eadccf] bg-white p-2 text-[#5b2d17] hover:bg-[#f4efe8]"
+                    aria-label="Scroll related products right"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
             {relatedLoading ? (
               <ModernLoader className="mt-3" label="Loading related items..." />
             ) : relatedProducts.length === 0 ? (
               <p className="mt-3 text-sm text-[#6f5647]">No related items found.</p>
             ) : (
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              <div
+                ref={setRelatedStripEl}
+                className="hide-scrollbar mt-3 -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 pl-4 pr-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
+              >
                 {relatedProducts.map((item) => (
                   <article
                     key={item._id}
-                    className="overflow-hidden rounded-2xl border border-[#eadccf] bg-white p-2.5 shadow-[0_8px_22px_rgba(47,28,18,0.05)] sm:p-3"
+                    className="snap-start w-[180px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 shadow-[0_18px_55px_rgba(47,28,18,0.09)] lg:w-[220px]"
                   >
                     <Link href={`/product/${item._id}`} className="block">
-                      <div className="relative h-24 overflow-hidden rounded-xl border border-[#efe2d5] bg-[#fffaf4] sm:h-28">
-                        {item.imageUrl ? <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized /> : null}
+                      <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60">
+                        <div className="relative h-28">
+                          {item.imageUrl ? <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized /> : null}
+                        </div>
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                        {getBadgePill(item.badge).label ? (
+                          <span
+                            className={[
+                              "absolute left-2 top-2 z-10 rounded-full px-2 py-1 text-[10px] font-semibold text-white",
+                              getBadgePill(item.badge).className,
+                            ].join(" ")}
+                          >
+                            {getBadgePill(item.badge).label}
+                          </span>
+                        ) : null}
                       </div>
-                      <p className="mt-2 line-clamp-1 text-xs font-semibold text-[#2f1c12] sm:text-sm">{item.name}</p>
-                      <p className="mt-0.5 text-xs font-semibold text-[#5b2d17]">PKR {Number(item.price) || 0}</p>
+                      <p className="mt-3 line-clamp-1 font-[family-name:var(--font-poppins)] text-[13px] font-semibold text-[#24130c]">
+                        {item.name}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#6f5647]">{item.description || ""}</p>
+                      <p className="mt-2 text-sm font-semibold text-[#5b2d17]">PKR {getProductCardPrice(item)}</p>
                     </Link>
                     <button
                       type="button"
@@ -314,8 +373,9 @@ export default function CheckoutPage() {
                         const snapshot = await fetchCartSnapshot();
                         setCart(snapshot);
                       }}
-                      className="mt-2 inline-flex h-8 w-full items-center justify-center rounded-lg bg-[#111] px-2 text-[11px] font-semibold text-white hover:bg-black sm:h-9 sm:text-xs"
+                      className="mt-2 inline-flex h-9 w-full items-center justify-center gap-1 rounded-xl bg-gradient-to-br from-[#5b2d17] to-[#8b3f1c] px-2 text-xs font-semibold text-white transition hover:brightness-[1.05]"
                     >
+                      <ShoppingCart className="h-3.5 w-3.5" />
                       Add
                     </button>
                   </article>
@@ -330,9 +390,7 @@ export default function CheckoutPage() {
         <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] z-40 border-t border-[#eadccf] bg-[#fffaf4]/97 px-4 pb-3 pt-2 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] text-[#7d6b5d]">
-                {cart?.totalItems || 0} item{(cart?.totalItems || 0) === 1 ? "" : "s"}
-              </p>
+              <p className="text-[11px] text-[#7d6b5d]">{cartItemNames.length ? cartItemNames.join(", ") : "No item selected"}</p>
               <p className="text-sm font-semibold text-[#2f1c12]">
                 Subtotal <span className="ml-1 text-[#b84a2b]">PKR {cart?.subtotal || 0}</span>
               </p>

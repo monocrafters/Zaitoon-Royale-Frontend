@@ -328,7 +328,7 @@ export default function PublicProductDetailsPage() {
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-xl border border-black/15 bg-white px-2 text-[11px] font-semibold text-[#111] hover:bg-[#f4efe8] sm:h-11 sm:min-w-[170px] sm:px-4 sm:text-sm"
+                className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-xl border border-black/15 bg-white px-2.5 text-[11px] font-semibold text-[#111] hover:bg-[#f4efe8] sm:h-11 sm:min-w-[170px] sm:px-4 sm:text-sm"
               >
                 WhatsApp Order
               </a>
