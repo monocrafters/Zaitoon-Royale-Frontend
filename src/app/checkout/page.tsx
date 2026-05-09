@@ -213,7 +213,12 @@ export default function CheckoutPage() {
   return (
     <main className="min-h-screen bg-[#f5efe8] text-[#2f1c12] antialiased">
       <SiteHeader />
-      <section className="w-full px-4 pb-36 pt-[96px] sm:px-6 lg:px-8 lg:pb-10">
+      <section
+        className={[
+          "w-full px-4 pt-[96px] sm:px-6 lg:px-8 lg:pb-10",
+          (cart?.items?.length || 0) > 0 ? "pb-52 sm:pb-44" : "pb-24",
+        ].join(" ")}
+      >
         <div className="w-full max-w-none">
           <h1 className="font-[family-name:var(--font-poppins)] text-3xl font-semibold text-[#111]">Checkout</h1>
           <p className="mt-1 text-sm text-[#6f5647]">Your details create a quick account so you can track orders from the header.</p>
@@ -375,14 +380,15 @@ export default function CheckoutPage() {
             ) : (
               <div
                 ref={setRelatedStripEl}
-                className="hide-scrollbar mt-3 -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 pl-4 pr-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
+                className="hide-scrollbar mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:px-0"
               >
                 {relatedProducts.map((item, idx) => (
                   <article
                     key={item._id}
                     className={[
-                      "snap-start w-[40vw] min-w-[148px] max-w-[168px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]",
-                      idx === 0 ? "ml-1 sm:ml-0" : "",
+                      "snap-start w-[62vw] min-w-[230px] max-w-[250px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]",
+                      idx === 0 ? "ml-2 sm:ml-0" : "",
+                      idx === relatedProducts.length - 1 ? "mr-2 sm:mr-0" : "",
                     ].join(" ")}
                   >
                     <Link href={`/product/${item._id}`} className="block">
@@ -405,51 +411,46 @@ export default function CheckoutPage() {
                       <p className="mt-3 line-clamp-1 font-[family-name:var(--font-poppins)] text-[13px] font-semibold text-[#24130c]">
                         {item.name}
                       </p>
-                      <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#6f5647]">{item.description || ""}</p>
+                      <p className="mt-1 line-clamp-1 text-[11px] leading-4 text-[#6f5647]">{item.description || ""}</p>
                       <div className="mt-2 flex items-center gap-1">
                         <span className="text-[10px] leading-none text-[#ffb347]">★★★★★</span>
                         <span className="text-[10px] font-semibold text-[#6f5647]">
                           ({Number(relatedReviewMap[item.name]?.avgRating || 0).toFixed(1)}) · {Number(relatedReviewMap[item.name]?.count || 0)} reviews
                         </span>
                       </div>
-                      <p className="mt-2 text-sm font-semibold text-[#5b2d17]">PKR {getProductCardPrice(item)}</p>
                     </Link>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (addingProductId === item._id) return;
-                        setAddingProductId(item._id);
-                        await addItemToCart(item._id, "", 1);
-                        const snapshot = await fetchCartSnapshot();
-                        setCart(snapshot);
-                        setAddingProductId("");
-                        setAddedProductId(item._id);
-                        window.setTimeout(() => {
-                          setAddedProductId((prev) => (prev === item._id ? "" : prev));
-                        }, 900);
-                      }}
-                      disabled={addingProductId === item._id}
-                      className="mt-2 inline-flex h-8 w-full items-center justify-center gap-1 rounded-xl bg-gradient-to-br from-[#5b2d17] to-[#8b3f1c] px-2 text-[11px] font-semibold text-white transition hover:brightness-[1.05]"
-                    >
-                      {addedProductId === item._id ? (
-                        <>
-                          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-[10px] font-bold text-[#5b2d17]">✓</span>
-                          Added
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingCart className="h-3.5 w-3.5" />
-                          {addingProductId === item._id ? (
-                            "Adding..."
-                          ) : (
-                            <>
-                              <span className="sm:hidden">Add</span>
-                              <span className="hidden sm:inline">Add to Order</span>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </button>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-[#5b2d17]">PKR {getProductCardPrice(item)}</p>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (addingProductId === item._id) return;
+                          setAddingProductId(item._id);
+                          await addItemToCart(item._id, "", 1);
+                          const snapshot = await fetchCartSnapshot();
+                          setCart(snapshot);
+                          setAddingProductId("");
+                          setAddedProductId(item._id);
+                          window.setTimeout(() => {
+                            setAddedProductId((prev) => (prev === item._id ? "" : prev));
+                          }, 900);
+                        }}
+                        disabled={addingProductId === item._id}
+                        className="inline-flex h-7 min-w-[74px] items-center justify-center gap-1 rounded-lg bg-gradient-to-br from-[#5b2d17] to-[#8b3f1c] px-2 text-[10px] font-semibold text-white transition hover:brightness-[1.05]"
+                      >
+                        {addedProductId === item._id ? (
+                          <>
+                            <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white text-[9px] font-bold text-[#5b2d17]">✓</span>
+                            Added
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="h-3 w-3" />
+                            {addingProductId === item._id ? "..." : "Add"}
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </article>
                 ))}
               </div>
