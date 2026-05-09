@@ -10,6 +10,7 @@ import SiteHeader from "@/components/public/site-header";
 import { API_BASE_URL } from "@/lib/admin-auth";
 import { fetchCustomerMe, registerCustomerAtCheckout, type CustomerProfile, useCustomerSession } from "@/lib/customer-auth";
 import { addItemToCart, fetchCartSnapshot, type CartSnapshot } from "@/lib/cart-client";
+import { fetchPublicReviewSummariesByTitles, type ProductReviewSummary } from "@/lib/reviews-client";
 import ModernLoader from "@/components/ui/modern-loader";
 
 type RelatedProduct = {
@@ -56,6 +57,9 @@ export default function CheckoutPage() {
   const [directType, setDirectType] = useState("");
   const [directId, setDirectId] = useState("");
   const [relatedStripEl, setRelatedStripEl] = useState<HTMLDivElement | null>(null);
+  const [relatedReviewMap, setRelatedReviewMap] = useState<Record<string, ProductReviewSummary>>({});
+  const [addingProductId, setAddingProductId] = useState("");
+  const [addedProductId, setAddedProductId] = useState("");
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -130,6 +134,30 @@ export default function CheckoutPage() {
       cancelled = true;
     };
   }, [directId, directType]);
+
+  useEffect(() => {
+    const titles = relatedProducts.map((p) => String(p.name || "").trim()).filter(Boolean);
+    if (!titles.length) {
+      setRelatedReviewMap({});
+      return;
+    }
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const payload = await fetchPublicReviewSummariesByTitles(titles);
+        if (cancelled) return;
+        const map: Record<string, ProductReviewSummary> = {};
+        for (const s of payload.summaries || []) map[s.productTitle] = s;
+        setRelatedReviewMap(map);
+      } catch {
+        if (!cancelled) setRelatedReviewMap({});
+      }
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [relatedProducts]);
 
   useEffect(() => {
     applyProfileToForm(profile);
@@ -341,7 +369,7 @@ export default function CheckoutPage() {
                 {relatedProducts.map((item) => (
                   <article
                     key={item._id}
-                    className="snap-start w-[180px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 shadow-[0_18px_55px_rgba(47,28,18,0.09)] lg:w-[220px]"
+                    className="snap-start w-[40vw] min-w-[148px] max-w-[168px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]"
                   >
                     <Link href={`/product/${item._id}`} className="block">
                       <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60">
@@ -364,19 +392,42 @@ export default function CheckoutPage() {
                         {item.name}
                       </p>
                       <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#6f5647]">{item.description || ""}</p>
+                      <div className="mt-2 flex items-center gap-1">
+                        <span className="text-[10px] leading-none text-[#ffb347]">★★★★★</span>
+                        <span className="text-[10px] font-semibold text-[#6f5647]">
+                          ({Number(relatedReviewMap[item.name]?.avgRating || 0).toFixed(1)}) · {Number(relatedReviewMap[item.name]?.count || 0)} reviews
+                        </span>
+                      </div>
                       <p className="mt-2 text-sm font-semibold text-[#5b2d17]">PKR {getProductCardPrice(item)}</p>
                     </Link>
                     <button
                       type="button"
                       onClick={async () => {
+                        if (addingProductId === item._id) return;
+                        setAddingProductId(item._id);
                         await addItemToCart(item._id, "", 1);
                         const snapshot = await fetchCartSnapshot();
                         setCart(snapshot);
+                        setAddingProductId("");
+                        setAddedProductId(item._id);
+                        window.setTimeout(() => {
+                          setAddedProductId((prev) => (prev === item._id ? "" : prev));
+                        }, 900);
                       }}
+                      disabled={addingProductId === item._id}
                       className="mt-2 inline-flex h-9 w-full items-center justify-center gap-1 rounded-xl bg-gradient-to-br from-[#5b2d17] to-[#8b3f1c] px-2 text-xs font-semibold text-white transition hover:brightness-[1.05]"
                     >
-                      <ShoppingCart className="h-3.5 w-3.5" />
-                      Add
+                      {addedProductId === item._id ? (
+                        <>
+                          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-[10px] font-bold text-[#5b2d17]">✓</span>
+                          Added
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="h-3.5 w-3.5" />
+                          {addingProductId === item._id ? "Adding..." : "Add to Order"}
+                        </>
+                      )}
                     </button>
                   </article>
                 ))}
@@ -387,7 +438,7 @@ export default function CheckoutPage() {
       </section>
 
       {(cart?.items?.length || 0) > 0 ? (
-        <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+72px)] z-40 border-t border-[#eadccf] bg-[#fffaf4]/97 px-4 pb-3 pt-2 backdrop-blur lg:hidden">
+        <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+56px)] z-40 border-t border-[#eadccf] bg-[#fffaf4]/97 px-4 pb-2.5 pt-2 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] text-[#7d6b5d]">{cartItemNames.length ? cartItemNames.join(", ") : "No item selected"}</p>
