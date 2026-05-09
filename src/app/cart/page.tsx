@@ -207,34 +207,38 @@ export default function CartPage() {
                       {item.kind === "deal" ? item.deal?.title || item.title || "Deal" : item.product?.name || item.title || "Item"}
                     </p>
                     <p className="text-xs text-[#7d6b5d]">
-                      {item.kind !== "deal" && item.size ? `${item.size.toUpperCase()} • ` : ""}PKR {item.unitPrice}
+                      {item.kind !== "deal" && item.size ? item.size.toUpperCase() : ""}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 rounded-xl border border-[#eadccf] px-1 py-1">
-                    <button
-                      type="button"
-                      onClick={() => updateQty(item, Math.max(1, item.qty - 1))}
-                      className="rounded-lg p-1.5 text-[#5b2d17] hover:bg-[#f6ece2]"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="min-w-6 text-center text-sm font-semibold">{item.qty}</span>
-                    <button
-                      type="button"
-                      onClick={() => updateQty(item, item.qty + 1)}
-                      className="rounded-lg p-1.5 text-[#5b2d17] hover:bg-[#f6ece2]"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
+                  <div className="flex min-w-[128px] flex-col items-end gap-1">
+                    <p className="text-right text-sm font-semibold text-[#5b2d17]">PKR {item.lineTotal}</p>
+                    <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5 rounded-lg border border-[#eadccf] px-0.5 py-0.5">
+                        <button
+                          type="button"
+                          onClick={() => updateQty(item, Math.max(1, item.qty - 1))}
+                          className="rounded-md p-1 text-[#5b2d17] hover:bg-[#f6ece2]"
+                        >
+                          <Minus className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="min-w-5 text-center text-xs font-semibold">{item.qty}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateQty(item, item.qty + 1)}
+                          className="rounded-md p-1 text-[#5b2d17] hover:bg-[#f6ece2]"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item)}
+                        className="rounded-md p-1.5 text-[#9b4f2d] hover:bg-[#fdf2eb]"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <p className="w-16 text-right text-sm font-semibold text-[#5b2d17] sm:w-20">PKR {item.lineTotal}</p>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item)}
-                    className="rounded-lg p-2 text-[#9b4f2d] hover:bg-[#fdf2eb]"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
                 </article>
               ))}
             </div>

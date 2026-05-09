@@ -326,7 +326,7 @@ export default function CheckoutPage() {
                     {(cart?.items || [])
                       .map((it) => String(it.deal?.title || it.product?.name || it.title || "").trim())
                       .filter(Boolean)
-                      .join(", ") || "—"}
+                      .join(" • ") || "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-1">

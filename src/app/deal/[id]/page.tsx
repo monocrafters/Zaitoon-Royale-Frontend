@@ -139,10 +139,8 @@ export default function DealDetailsPage() {
   const productsLine = getProductsLine(deal);
   const finalPrice = Number(deal.pricing?.finalPrice) || 0;
   const originalPrice = Number(deal.pricing?.originalPrice) || 0;
-  const whatsappHref = useMemo(() => {
-    const message = `Assalam o Alaikum, I want to order this deal: *${deal.title}*\nPrice: PKR ${finalPrice}\nDeal ID: ${deal._id}`;
-    return `https://wa.me/923001234567?text=${encodeURIComponent(message)}`;
-  }, [deal._id, deal.title, finalPrice]);
+  const whatsappMessage = `Assalam o Alaikum, I want to order this deal: *${deal.title}*\nPrice: PKR ${finalPrice}\nDeal ID: ${deal._id}`;
+  const whatsappHref = `https://wa.me/923001234567?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <main className="bg-[#f5efe8] text-[#2f1c12]">
