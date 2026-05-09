@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 
@@ -69,6 +69,7 @@ const getBadgePill = (badge?: Product["badge"]) => {
 
 export default function PublicProductDetailsPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [product, setProduct] = useState<Product | null>(null);
@@ -86,6 +87,16 @@ export default function PublicProductDetailsPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const id = useMemo(() => params?.id || "", [params?.id]);
+  const selectedPrice = useMemo(
+    () => (product ? getDisplayPrice(product, selectedSize) : 0),
+    [product, selectedSize]
+  );
+  const whatsappHref = useMemo(() => {
+    const title = product?.name ? `*${product.name}*` : "this product";
+    const sizeText = product?.hasSizePricing ? `\nSize: ${selectedSize}` : "";
+    const message = `Assalam o Alaikum, I want to order ${title}.${sizeText}\nPrice: PKR ${selectedPrice}\nProduct ID: ${product?._id || ""}`;
+    return `https://wa.me/923001234567?text=${encodeURIComponent(message)}`;
+  }, [product, selectedPrice, selectedSize]);
 
   const eligiblePendingItem = useMemo(() => {
     if (!product?.name) return null;
@@ -290,29 +301,34 @@ export default function PublicProductDetailsPage() {
               </span>
             </div>
 
-            <div className="mt-7 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-3">
-              <Link
-                href="/checkout"
-                className="inline-flex items-center justify-center rounded-xl bg-[#5b2d17] px-3 py-2 text-xs font-semibold text-white hover:brightness-[1.03] sm:px-6 sm:py-3 sm:text-sm"
+            <div className="mt-7 grid grid-cols-3 gap-1.5 sm:flex sm:flex-nowrap sm:gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!product?._id) return;
+                  await addItemToCart(product._id, product.hasSizePricing ? selectedSize : "", 1);
+                  router.push(`/checkout?direct=product&id=${encodeURIComponent(product._id)}`);
+                }}
+                className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-xl bg-[#5b2d17] px-2 text-[11px] font-semibold !text-white hover:brightness-[1.03] sm:h-11 sm:min-w-[130px] sm:px-4 sm:text-sm"
               >
                 Order Now
-              </Link>
+              </button>
               <button
                 type="button"
                 onClick={async (event) => {
                   if (!product?._id) return;
                   await addItemToCart(product._id, product.hasSizePricing ? selectedSize : "", 1, event.currentTarget);
                 }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111] px-3 py-2 text-xs font-semibold text-white hover:bg-black sm:px-6 sm:py-3 sm:text-sm"
+                className="inline-flex h-10 items-center justify-center gap-1 whitespace-nowrap rounded-xl bg-[#111] px-2 text-[11px] font-semibold text-white hover:bg-black sm:h-11 sm:min-w-[150px] sm:gap-2 sm:px-4 sm:text-sm"
               >
-                <ShoppingCart className="h-4 w-4" />
+                <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Add to Cart
               </button>
               <a
-                href="https://wa.me/923001234567"
+                href={whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-xl border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-[#111] hover:bg-[#f4efe8] sm:px-6 sm:py-3 sm:text-sm"
+                className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-xl border border-black/15 bg-white px-2 text-[11px] font-semibold text-[#111] hover:bg-[#f4efe8] sm:h-11 sm:min-w-[170px] sm:px-4 sm:text-sm"
               >
                 WhatsApp Order
               </a>

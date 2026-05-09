@@ -1,13 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 
 import SiteHeader from "@/components/public/site-header";
+import { API_BASE_URL } from "@/lib/admin-auth";
 import { fetchCustomerMe, registerCustomerAtCheckout, type CustomerProfile, useCustomerSession } from "@/lib/customer-auth";
-import { fetchCartSnapshot, type CartSnapshot } from "@/lib/cart-client";
+import { addItemToCart, fetchCartSnapshot, type CartSnapshot } from "@/lib/cart-client";
 import ModernLoader from "@/components/ui/modern-loader";
+
+type RelatedProduct = {
+  _id: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  price?: number;
+  category?: { name?: string };
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -17,6 +29,11 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [savedDelivery, setSavedDelivery] = useState<CustomerProfile | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
+  const [directProductName, setDirectProductName] = useState("");
+  const [directType, setDirectType] = useState("");
+  const [directId, setDirectId] = useState("");
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -52,6 +69,54 @@ export default function CheckoutPage() {
     };
     void load();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setDirectType(String(params.get("direct") || "").trim());
+    setDirectId(String(params.get("id") || "").trim());
+  }, []);
+
+  useEffect(() => {
+    if (directType !== "product" || !directId) {
+      setDirectProductName("");
+      setRelatedProducts([]);
+      return;
+    }
+    let cancelled = false;
+    const loadRelated = async () => {
+      setRelatedLoading(true);
+      try {
+        const [detailRes, listRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/products/public/${directId}`, { cache: "no-store" }),
+          fetch(`${API_BASE_URL}/products/public`, { cache: "no-store" }),
+        ]);
+        const detailPayload = await detailRes.json();
+        const listPayload = await listRes.json();
+        if (!detailRes.ok || !listRes.ok) throw new Error("Unable to load related items.");
+        const selected = (detailPayload?.product || null) as RelatedProduct | null;
+        const allProducts = (Array.isArray(listPayload?.products) ? listPayload.products : []) as RelatedProduct[];
+        const related = selected
+          ? allProducts
+              .filter((p) => p._id !== selected._id && p.category?.name === selected.category?.name)
+              .slice(0, 6)
+          : [];
+        if (cancelled) return;
+        setDirectProductName(selected?.name || "");
+        setRelatedProducts(related);
+      } catch {
+        if (cancelled) return;
+        setDirectProductName("");
+        setRelatedProducts([]);
+      } finally {
+        if (!cancelled) setRelatedLoading(false);
+      }
+    };
+    void loadRelated();
+    return () => {
+      cancelled = true;
+    };
+  }, [directId, directType]);
 
   useEffect(() => {
     applyProfileToForm(profile);
@@ -216,6 +281,48 @@ export default function CheckoutPage() {
               </div>
             </aside>
           </div>
+        ) : null}
+
+        {directType === "product" ? (
+          <section className="mt-6 w-full">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-lg font-semibold text-[#1d140f]">Related Items</h3>
+              {directProductName ? <p className="text-xs text-[#7d6b5d]">Based on {directProductName}</p> : null}
+            </div>
+            {relatedLoading ? (
+              <ModernLoader className="mt-3" label="Loading related items..." />
+            ) : relatedProducts.length === 0 ? (
+              <p className="mt-3 text-sm text-[#6f5647]">No related items found.</p>
+            ) : (
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                {relatedProducts.map((item) => (
+                  <article
+                    key={item._id}
+                    className="overflow-hidden rounded-2xl border border-[#eadccf] bg-white p-2.5 shadow-[0_8px_22px_rgba(47,28,18,0.05)] sm:p-3"
+                  >
+                    <Link href={`/product/${item._id}`} className="block">
+                      <div className="relative h-24 overflow-hidden rounded-xl border border-[#efe2d5] bg-[#fffaf4] sm:h-28">
+                        {item.imageUrl ? <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized /> : null}
+                      </div>
+                      <p className="mt-2 line-clamp-1 text-xs font-semibold text-[#2f1c12] sm:text-sm">{item.name}</p>
+                      <p className="mt-0.5 text-xs font-semibold text-[#5b2d17]">PKR {Number(item.price) || 0}</p>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await addItemToCart(item._id, "", 1);
+                        const snapshot = await fetchCartSnapshot();
+                        setCart(snapshot);
+                      }}
+                      className="mt-2 inline-flex h-8 w-full items-center justify-center rounded-lg bg-[#111] px-2 text-[11px] font-semibold text-white hover:bg-black sm:h-9 sm:text-xs"
+                    >
+                      Add
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
         ) : null}
       </section>
 
