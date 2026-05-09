@@ -290,14 +290,20 @@ export default function PublicProductDetailsPage() {
               </span>
             </div>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-7 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+              <Link
+                href="/checkout"
+                className="inline-flex items-center justify-center rounded-xl bg-[#5b2d17] px-3 py-2 text-xs font-semibold text-white hover:brightness-[1.03] sm:px-6 sm:py-3 sm:text-sm"
+              >
+                Order Now
+              </Link>
               <button
                 type="button"
                 onClick={async (event) => {
                   if (!product?._id) return;
                   await addItemToCart(product._id, product.hasSizePricing ? selectedSize : "", 1, event.currentTarget);
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#111] px-6 py-3 text-sm font-semibold text-white hover:bg-black"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111] px-3 py-2 text-xs font-semibold text-white hover:bg-black sm:px-6 sm:py-3 sm:text-sm"
               >
                 <ShoppingCart className="h-4 w-4" />
                 Add to Cart
@@ -306,7 +312,7 @@ export default function PublicProductDetailsPage() {
                 href="https://wa.me/923001234567"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-xl border border-black/15 bg-white px-6 py-3 text-sm font-semibold text-[#111] hover:bg-[#f4efe8]"
+                className="inline-flex items-center justify-center rounded-xl border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-[#111] hover:bg-[#f4efe8] sm:px-6 sm:py-3 sm:text-sm"
               >
                 WhatsApp Order
               </a>
@@ -384,7 +390,7 @@ export default function PublicProductDetailsPage() {
                   <div className="mt-2 flex items-center gap-1">
                     <span className="text-[10px] leading-none text-[#ffb347]">★★★★★</span>
                     <span className="text-[10px] font-semibold text-[#6f5647]">
-                      ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.orderCount || 0)} orders
+                      ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.count || 0)} reviews
                     </span>
                   </div>
 

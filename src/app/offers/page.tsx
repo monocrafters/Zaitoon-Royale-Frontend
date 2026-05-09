@@ -324,7 +324,7 @@ export default function OffersPage() {
                     >
                       <span className="text-[#ffb347]">★★★★★</span>
                       <span className="text-xs font-semibold text-[#6f5647]">
-                        ({Number(activeDealReview.avgRating || 0).toFixed(1)}) · {Number(activeDealReview.orderCount || 0)} orders
+                        ({Number(activeDealReview.avgRating || 0).toFixed(1)}) · {Number(activeDealReview.count || 0)} reviews
                       </span>
                     </motion.div>
 
@@ -382,9 +382,8 @@ export default function OffersPage() {
                     </div>
                     <div className="relative mt-1 flex items-center gap-1 text-[11px] text-[#6f5647]">
                       <Star className="h-3.5 w-3.5 fill-[#ffb347] text-[#ffb347]" />
-                      <span>{Number(rating.avgRating || 0).toFixed(1)} · {Number(rating.orderCount || 0)} orders</span>
+                      <span>{Number(rating.avgRating || 0).toFixed(1)} · {Number(rating.count || 0)} reviews</span>
                     </div>
-                    {rating.latestReviewText ? <p className="relative mt-1 line-clamp-1 text-[10px] text-[#8b8178]">"{rating.latestReviewText}"</p> : null}
                   </Link>
                 );
               })}

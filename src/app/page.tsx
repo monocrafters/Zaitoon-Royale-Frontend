@@ -1196,12 +1196,9 @@ export default function Home() {
                       <div className="flex items-center gap-0.5 pt-0.5">
                         <span className="text-[10px] leading-none text-[#ffb347]">★★★★★</span>
                         <span className="text-[10px] font-semibold text-[#6f5647]">
-                          ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.orderCount || 0)} orders
+                          ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.count || 0)} reviews
                         </span>
                       </div>
-                      {summary?.latestReviewText ? (
-                        <p className="line-clamp-1 text-[10px] text-[#8b8178]">"{summary.latestReviewText}"</p>
-                      ) : null}
 
                       <div className="flex items-center justify-between gap-1.5 pt-0.5">
                         <p className="text-[12px] font-semibold text-[#5b2d17] leading-none whitespace-nowrap">
@@ -1268,12 +1265,9 @@ export default function Home() {
                       <div className="mt-2 flex items-center gap-1">
                         <span className="text-[10px] leading-none text-[#ffb347]">★★★★★</span>
                         <span className="text-[10px] font-semibold text-[#6f5647]">
-                          ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.orderCount || 0)} orders
+                          ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.count || 0)} reviews
                         </span>
                       </div>
-                      {summary?.latestReviewText ? (
-                        <p className="mt-1 line-clamp-1 text-[10px] text-[#8b8178]">"{summary.latestReviewText}"</p>
-                      ) : null}
 
                       <div className="mt-auto flex flex-nowrap items-center justify-between gap-2 pt-2">
                         <p className="text-sm font-semibold text-[#5b2d17] whitespace-nowrap">
@@ -1545,7 +1539,7 @@ export default function Home() {
                                   {deal.description || deal.subtitle || " "}
                                 </p>
                                 <p className="mt-1 text-xs text-white/92">
-                                  ★ {Number(dealReview.avgRating || 0).toFixed(1)} · {Number(dealReview.orderCount || 0)} orders
+                                  ★ {Number(dealReview.avgRating || 0).toFixed(1)} · {Number(dealReview.count || 0)} reviews
                                 </p>
 
                                 <div className="mt-auto pt-2">
@@ -1662,7 +1656,7 @@ export default function Home() {
                             {productsSummary}
                           </p>
                           <p className="mt-1 text-[8.5px] text-white/90">
-                            ★ {Number(dealReview.avgRating || 0).toFixed(1)} · {Number(dealReview.orderCount || 0)} orders
+                            ★ {Number(dealReview.avgRating || 0).toFixed(1)} · {Number(dealReview.count || 0)} reviews
                           </p>
 
                           <div className="mt-auto space-y-2">

@@ -154,12 +154,9 @@ export default function AllProductsPage() {
                     <div className="mt-2 flex items-center gap-1">
                       <span className="text-[10px] leading-none text-[#ffb347]">★★★★★</span>
                       <span className="text-[10px] font-semibold text-[#6f5647]">
-                        ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.orderCount || 0)} orders
+                        ({Number(summary?.avgRating || 0).toFixed(1)}) · {Number(summary?.count || 0)} reviews
                       </span>
                     </div>
-                    {summary?.latestReviewText ? (
-                      <p className="mt-1 line-clamp-1 text-[10px] text-[#8b8178]">"{summary.latestReviewText}"</p>
-                    ) : null}
 
                     <div className="mt-auto flex items-center justify-between gap-2 pt-2">
                       <p className="text-sm font-semibold text-[#5b2d17] whitespace-nowrap">PKR {getProductCardPrice(item)}</p>

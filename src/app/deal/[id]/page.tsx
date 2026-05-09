@@ -178,7 +178,13 @@ export default function DealDetailsPage() {
               ) : null}
             </div>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-7 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+              <Link
+                href="/checkout"
+                className="inline-flex items-center justify-center rounded-xl bg-[#5b2d17] px-3 py-2 text-xs font-semibold text-white hover:brightness-[1.03] sm:px-6 sm:py-3 sm:text-sm"
+              >
+                Order Now
+              </Link>
               <button
                 type="button"
                 onClick={async (event) => {
@@ -190,18 +196,23 @@ export default function DealDetailsPage() {
                     { title: deal.title, imageUrl: deal.imageUrl || "", unitPrice: finalPrice }
                   );
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#111] px-6 py-3 text-sm font-semibold text-white hover:bg-black"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#111] px-3 py-2 text-xs font-semibold text-white hover:bg-black sm:px-6 sm:py-3 sm:text-sm"
               >
                 <ShoppingCart className="h-4 w-4" />
                 Add Deal to Cart
               </button>
-              <Link
-                href="/offers"
-                className="rounded-xl border border-black/15 bg-white px-6 py-3 text-sm font-semibold text-[#111] hover:bg-[#f4efe8]"
+              <a
+                href="https://wa.me/923001234567"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-xl border border-black/15 bg-white px-3 py-2 text-xs font-semibold text-[#111] hover:bg-[#f4efe8] sm:px-6 sm:py-3 sm:text-sm"
               >
-                Back to offers
-              </Link>
+                WhatsApp Order
+              </a>
             </div>
+            <Link href="/offers" className="mt-4 inline-flex text-sm font-semibold text-[#5b2d17] hover:underline">
+              Back to offers
+            </Link>
           </motion.div>
         </div>
 
