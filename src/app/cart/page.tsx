@@ -155,7 +155,7 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-[#f5efe8] text-[#2f1c12] antialiased">
       <SiteHeader />
-      <section className="mx-auto max-w-7xl px-4 pb-36 pt-[96px] sm:px-6">
+      <section className="mx-auto max-w-7xl px-4 pb-56 pt-[96px] sm:px-6 sm:pb-36">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-[family-name:var(--font-poppins)] text-3xl font-semibold text-[#111]">Your Cart</h1>
           <button
