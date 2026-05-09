@@ -247,9 +247,9 @@ export default function CheckoutPage() {
 
         {(cart?.items?.length || 0) > 0 ? (
           <div className="mt-6 grid w-full max-w-none gap-3 sm:gap-5 lg:grid-cols-[1fr_360px]">
-            <div className="border-y border-[#eadccf] bg-white p-4 sm:rounded-3xl sm:border sm:p-5 lg:rounded-3xl">
+            <div className="border-0 bg-transparent p-0 sm:rounded-3xl sm:border sm:border-[#eadccf] sm:bg-white sm:p-5 lg:rounded-3xl">
               <h2 className="text-lg font-semibold text-[#1d140f]">Delivery Details</h2>
-              <div className="mt-3 grid gap-3">
+              <div className="mt-3 grid gap-3 bg-transparent sm:bg-transparent">
                 <input
                   value={form.fullName}
                   onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
@@ -326,6 +326,17 @@ export default function CheckoutPage() {
                   Subtotal <span className="ml-1 text-[#b84a2b]">PKR {cart?.subtotal || 0}</span>
                 </p>
                 <p className="mt-1 text-[11px] text-[#7d6b5d]">Payment method and final confirmation on next step.</p>
+                {(cart?.items?.length || 0) > 0 ? (
+                  <div className="mt-3 rounded-xl border border-[#efe2d5] bg-[#fffaf4] p-2.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#7d6b5d]">All Items</p>
+                    <p className="mt-1 text-xs leading-5 text-[#5f544b]">
+                      {(cart?.items || [])
+                        .map((it) => String(it.deal?.title || it.product?.name || it.title || "").trim())
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </aside>
           </div>
@@ -364,12 +375,15 @@ export default function CheckoutPage() {
             ) : (
               <div
                 ref={setRelatedStripEl}
-                className="hide-scrollbar mt-3 -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 pl-4 pr-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
+                className="hide-scrollbar mt-3 -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 pl-4 pr-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
               >
-                {relatedProducts.map((item) => (
+                {relatedProducts.map((item, idx) => (
                   <article
                     key={item._id}
-                    className="snap-start w-[40vw] min-w-[148px] max-w-[168px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]"
+                    className={[
+                      "snap-start w-[40vw] min-w-[148px] max-w-[168px] shrink-0 overflow-hidden rounded-3xl border border-[#eadccf] bg-gradient-to-b from-[#fff7ea] via-white to-[#f6ece2] p-3 lg:w-[220px] lg:min-w-[220px] lg:max-w-[220px]",
+                      idx === 0 ? "ml-1 sm:ml-0" : "",
+                    ].join(" ")}
                   >
                     <Link href={`/product/${item._id}`} className="block">
                       <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/60">
@@ -415,7 +429,7 @@ export default function CheckoutPage() {
                         }, 900);
                       }}
                       disabled={addingProductId === item._id}
-                      className="mt-2 inline-flex h-9 w-full items-center justify-center gap-1 rounded-xl bg-gradient-to-br from-[#5b2d17] to-[#8b3f1c] px-2 text-xs font-semibold text-white transition hover:brightness-[1.05]"
+                      className="mt-2 inline-flex h-8 w-full items-center justify-center gap-1 rounded-xl bg-gradient-to-br from-[#5b2d17] to-[#8b3f1c] px-2 text-[11px] font-semibold text-white transition hover:brightness-[1.05]"
                     >
                       {addedProductId === item._id ? (
                         <>
@@ -425,7 +439,14 @@ export default function CheckoutPage() {
                       ) : (
                         <>
                           <ShoppingCart className="h-3.5 w-3.5" />
-                          {addingProductId === item._id ? "Adding..." : "Add to Order"}
+                          {addingProductId === item._id ? (
+                            "Adding..."
+                          ) : (
+                            <>
+                              <span className="sm:hidden">Add</span>
+                              <span className="hidden sm:inline">Add to Order</span>
+                            </>
+                          )}
                         </>
                       )}
                     </button>
@@ -440,8 +461,13 @@ export default function CheckoutPage() {
       {(cart?.items?.length || 0) > 0 ? (
         <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+56px)] z-40 border-t border-[#eadccf] bg-[#fffaf4]/97 px-4 pb-2.5 pt-2 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] text-[#7d6b5d]">{cartItemNames.length ? cartItemNames.join(", ") : "No item selected"}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] leading-4 text-[#7d6b5d] break-words">
+                {(cart?.items || [])
+                  .map((it) => String(it.deal?.title || it.product?.name || it.title || "").trim())
+                  .filter(Boolean)
+                  .join(", ") || "No item selected"}
+              </p>
               <p className="text-sm font-semibold text-[#2f1c12]">
                 Subtotal <span className="ml-1 text-[#b84a2b]">PKR {cart?.subtotal || 0}</span>
               </p>
@@ -450,7 +476,7 @@ export default function CheckoutPage() {
               type="button"
               onClick={() => void submitOrder()}
               disabled={submitting || !form.fullName.trim() || !form.phone.trim() || !form.address.trim()}
-              className="rounded-xl bg-[#111] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-55"
+              className="shrink-0 rounded-xl bg-[#111] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-55"
             >
               {submitting ? "Saving..." : "Proceed"}
             </button>
