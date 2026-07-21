@@ -1,7 +1,7 @@
 export const ADMIN_TOKEN_KEY = "restaurant_admin_token";
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://zaitoon-royale-production.up.railway.app";
+  "https://zaitoon-royale-production.up.railway.app/api";
 
 export const setAdminAuth = (token: string) => {
   if (typeof window === "undefined") {
